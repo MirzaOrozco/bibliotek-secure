@@ -1,10 +1,10 @@
 ﻿using Xunit;
 using Domain;
 using Infrastructure.Data;
-using Application.Commands.Books;
-using Application.Handler;
+using API.Commands.Books;
+using API.Handler;
 
-namespace Tests.Application.Commands
+namespace Tests.API.Commands
 {
     public class DeleteBookCommandHandlerTests
     {

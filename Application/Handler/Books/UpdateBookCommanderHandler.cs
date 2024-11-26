@@ -1,7 +1,7 @@
-﻿using Application.Commands.Books;
+﻿using API.Commands.Books;
 using Infrastructure.Data;
 
-namespace Application.Handler
+namespace API.Handler.Books
 {
     public class UpdateBookCommandHandler
     {

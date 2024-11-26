@@ -1,10 +1,10 @@
 ﻿using Xunit;
-using Application.Commands.Authors;
+using API.Commands.Authors;
 using Domain;
 using Infrastructure.Data;
-using Application.Handler;
+using API.Handler;
 
-namespace Library.Tests.Application.Commands.Authors
+namespace Library.Tests.API.Commands.Authors
 {
     public class DeleteAuthorCommandHandlerTests
     {

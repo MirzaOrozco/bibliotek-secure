@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Queries.Books
+namespace API.Queries.Books
 {
     internal class GetAllBooksQuery
     {

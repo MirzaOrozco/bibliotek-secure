@@ -1,8 +1,8 @@
 ﻿using Xunit;
-using Application.Commands.Books;
+using API.Commands.Books;
 using Infrastructure.Data;
 
-namespace Tests.Application.Commands.Books
+namespace Tests.API.Commands.Books
 {
     public class CreateBookCommandHandlerTests
     {

@@ -1,9 +1,9 @@
-﻿using Application.Commands.Books;
+﻿using API.Commands.Books;
 using Domain;
 using Infrastructure.Data;
 
 
-namespace Application.Commands.Books
+namespace API.Handler.Books
 {
     public class CreateBookCommandHandler
     {

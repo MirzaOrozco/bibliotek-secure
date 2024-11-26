@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace API.Queries.Books
+namespace API.Queries.Authors
 {
-    public class GetBooksByIdQuery
+    internal class GetAuthorByIdQuery
     {
-        public int Id { get; set; }
     }
 }

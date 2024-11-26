@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Commands.Books
+namespace API.Commands.Books
 {
     public class DeleteBookCommand
     {

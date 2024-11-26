@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Application.Commands.Authors;
+using API.Commands.Authors;
 
-namespace Application.Handler
+namespace API.Handler.Authors
 {
     public class CreateAuthorCommandHandler
     {

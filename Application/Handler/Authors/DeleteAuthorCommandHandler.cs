@@ -1,4 +1,4 @@
-﻿using Application.Commands.Authors;
+﻿using API.Commands.Authors;
 using Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Handler
+namespace API.Handler.Authors
 {
     public class DeleteAuthorCommandHandler
     {

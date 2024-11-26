@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Application.Commands.Authors;
+using API.Commands.Authors;
 using Infrastructure.Data;
-using Application.Handler;
+using API.Handler.Authors;
 
 namespace Presentation.Controllers
 {
