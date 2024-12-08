@@ -1,54 +1,64 @@
-﻿using Infrastructure.Data;         
-using Domain;                     
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Application.Commands.Books;
-using Application.Handler;
+using MediatR;
+using Application.DataTransferObjects.Books;
+using Application.Queries.Books;
 
-namespace Presentation.Controllers
+namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
-        private readonly FakeDatabase _db;
+        private readonly IMediator _mediator;
 
-        public BookController()
+        public BookController(IMediator mediator)
         {
-            _db = new FakeDatabase(); //  Fake Database
+            _mediator = mediator;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetBookById(int id)
+        // Get all books from database
+        [HttpGet]
+        [Route("getAllBooks")]
+        public async Task<IActionResult> GetAllBooks()
         {
-            var book = _db.Books.Find(b => b.Id == id);
-            if (book == null) return NotFound();
-            return Ok(book);
+            return Ok(await _mediator.Send(new GetAllBooksQuery()));
         }
 
+        //Get a Book by Id
+        [HttpGet]
+        [Route("getBookId/{bookId}")]
+        public async Task<IActionResult> GetBookById(Guid bookId)
+        {
+            return Ok(await _mediator.Send(new GetBookByIdQuery(bookId)));
+        }
+
+        //Get all Books by Author Id
+        [HttpGet]
+        [Route("getBooksByAuthorId/{authorId}")]
+        public async Task<IActionResult> GetBooksByAuthorId(Guid authorId)
+        {
+            return Ok(await _mediator.Send(new GetBooksByAuthorIdQuery(authorId)));
+        }
+
+        // Add/Create New Book
         [HttpPost]
-
-        public IActionResult CreateBook(CreateBookCommand command)
+        [Route("createBook")]
+        public async Task<IActionResult> CreateBook([FromBody] BookDto newBook)
         {
-            var newBook = new Book
-            {
-                Id = _db.Books.Count + 1,
-                Title = command.Title,
-                AuthorId = command.AuthorId
-            };
-            _db.Books.Add(newBook);
-            return CreatedAtAction(nameof(GetBookById), new { id = newBook.Id }, newBook);
+            return Ok(await _mediator.Send(new CreateBookCommand(newBook)));
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteBook(int id, [FromQuery] int userId)
+        [HttpDelete]
+        [Route("deleteBook/{id}")]
+        public async Task<IActionResult> DeleteBook(Guid id)
         {
-            var command = new DeleteBookCommand { BookId = id, UserId = userId };
-            var handler = new DeleteBookCommandHandler(_db);
-
+            return Ok(await _mediator.Send(new DeleteBookCommand(id)));
+            /*
             try
             {
                 handler.Handle(command);
-                return Ok("Libro eliminado exitosamente.");
+                return Ok("Book deleted succesfully.");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -58,18 +68,19 @@ namespace Presentation.Controllers
             {
                 return NotFound(ex.Message);
             }
+            */
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateBook(int id, [FromBody] UpdateBookCommand command)
+        [HttpPut]
+        [Route("updateBook/{id}")]
+        public async Task<IActionResult> UpdateBook([FromBody] BookDto updatedBook, Guid id)
         {
-            command.BookId = id; // To be sure the Id Book it's right
-            var handler = new UpdateBookCommandHandler(_db);
-
+            return Ok(await _mediator.Send(new UpdateBookCommand(updatedBook, id)));
+/*
             try
             {
                 handler.Handle(command);
-                return Ok("Libro actualizado exitosamente.");
+                return Ok("Book update succesfully.");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -79,6 +90,7 @@ namespace Presentation.Controllers
             {
                 return NotFound(ex.Message);
             }
+*/
         }
     }
 }
