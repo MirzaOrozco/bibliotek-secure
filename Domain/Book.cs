@@ -8,10 +8,9 @@ namespace Domain
 {
     public class Book
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public int AuthorId { get; set; }
-        public bool IsReserved { get; set; }
-        public int? ReservedByUserId { get; set; }
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public Guid AuthorId { get; set; }
+        public Guid? ReservedByUserId { get; set; }
     }
 }
