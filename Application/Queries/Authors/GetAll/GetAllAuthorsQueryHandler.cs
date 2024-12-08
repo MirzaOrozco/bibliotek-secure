@@ -1,10 +1,11 @@
 ﻿using Domain;
 using Infrastructure.Data;
 using MediatR;
+using System.Collections.Generic;
 
 namespace Application.Queries.Authors
 {
-    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
+    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, OperationResult<List<Author>>>
     {
         private readonly FakeDatabase _db;
 
@@ -12,10 +13,10 @@ namespace Application.Queries.Authors
         {
             _db = db;
         }
-        public Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<List<Author>>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
         {
             var authors = _db.Authors;
-            return Task.FromResult(authors);
+            return OperationResult<List<Author>>.Successful(authors, String.Format("Found {0} authors", authors.Count));
         }
     }
 }

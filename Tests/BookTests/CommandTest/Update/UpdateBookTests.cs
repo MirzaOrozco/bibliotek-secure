@@ -30,9 +30,11 @@ namespace Tests.BookTests.CommandTest.Update
             int oldCount = _db.Books.Count;
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(updatedBook.Title, result.Title);
             Assert.Equal(oldCount, _db.Books.Count);
@@ -43,7 +45,7 @@ namespace Tests.BookTests.CommandTest.Update
         }
 
         [Fact]
-        public async Task InvalidBookId_ThrowsKeyNotFoundException()
+        public async Task InvalidBookId_KeyNotFound()
         {
             // Arrange
             BookDto updatedBook = new BookDto
@@ -55,14 +57,15 @@ namespace Tests.BookTests.CommandTest.Update
             var command = new UpdateBookCommand(updatedBook, bookId);
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<KeyNotFoundException>(action);
+            Assert.False(operationResult.IsSuccessful);
+            Assert.True(operationResult.IsKeyNotFound);
         }
 
         [Fact]
-        public async Task InvalidTitle_ThrowsArgumentException()
+        public async Task InvalidTitle_Failure()
         {
             // Arrange
             BookDto updatedBook = new BookDto
@@ -74,14 +77,15 @@ namespace Tests.BookTests.CommandTest.Update
             var command = new UpdateBookCommand(updatedBook, bookId);
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action);
+            Assert.False(operationResult.IsSuccessful);
+            Assert.False(operationResult.IsKeyNotFound);
         }
 
         [Fact]
-        public async Task InvalidAuthor_ThrowsArgumentException()
+        public async Task InvalidAuthor_Failure()
         {
             // Arrange
             BookDto updatedBook = new BookDto
@@ -93,11 +97,11 @@ namespace Tests.BookTests.CommandTest.Update
             var command = new UpdateBookCommand(updatedBook, bookId);
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action);
+            Assert.False(operationResult.IsSuccessful);
+            Assert.False(operationResult.IsKeyNotFound);
         }
-
     }
 }

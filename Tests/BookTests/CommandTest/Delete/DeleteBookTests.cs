@@ -26,9 +26,11 @@ namespace Tests.BookTests.CommandTest.Delete
             int oldCount = _db.Books.Count;
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(bookId, result.Id);
             Assert.Equal(oldCount - 1, _db.Books.Count);
@@ -36,7 +38,7 @@ namespace Tests.BookTests.CommandTest.Delete
         }
 
         [Fact]
-        public async Task InvalidBookId_ThrowsKeyNotFoundException()
+        public async Task InvalidBookId_KeyNotFound()
         {
             // Arrange
             Guid bookId = Guid.NewGuid();
@@ -44,10 +46,11 @@ namespace Tests.BookTests.CommandTest.Delete
             int oldCount = _db.Books.Count;
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<KeyNotFoundException>(action);
+            Assert.False(operationResult.IsSuccessful);
+            Assert.True(operationResult.IsKeyNotFound);
             Assert.Equal(oldCount, _db.Books.Count);
         }
     }

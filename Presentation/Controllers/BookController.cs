@@ -3,6 +3,7 @@ using Application.Commands.Books;
 using MediatR;
 using Application.DataTransferObjects.Books;
 using Application.Queries.Books;
+using Domain;
 
 namespace API.Controllers
 {
@@ -17,12 +18,36 @@ namespace API.Controllers
             _mediator = mediator;
         }
 
+        private IActionResult ReturnCode<T>(OperationResult<T> operationResult)
+        {
+            if (operationResult.IsSuccessful)
+            {
+                return Ok(new { message = operationResult.Message, data = operationResult.Data, details = operationResult.Details });
+            }
+            else if (operationResult.IsKeyNotFound)
+            {
+                return NotFound(new { message = operationResult.Message, errors = operationResult.Details });
+            }
+            else
+            {
+                return BadRequest(new { message = operationResult.Message, errors = operationResult.Details });
+            }
+        }
+
         // Get all books from database
         [HttpGet]
         [Route("getAllBooks")]
         public async Task<IActionResult> GetAllBooks()
         {
-            return Ok(await _mediator.Send(new GetAllBooksQuery()));
+            try
+            {
+                var operationResult = await _mediator.Send(new GetAllBooksQuery());
+                return ReturnCode(operationResult);
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         //Get a Book by Id
@@ -30,7 +55,15 @@ namespace API.Controllers
         [Route("getBookId/{bookId}")]
         public async Task<IActionResult> GetBookById(Guid bookId)
         {
-            return Ok(await _mediator.Send(new GetBookByIdQuery(bookId)));
+            try
+            {
+                var operationResult = await _mediator.Send(new GetBookByIdQuery(bookId));
+                return ReturnCode(operationResult);
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         //Get all Books by Author Id
@@ -38,7 +71,15 @@ namespace API.Controllers
         [Route("getBooksByAuthorId/{authorId}")]
         public async Task<IActionResult> GetBooksByAuthorId(Guid authorId)
         {
-            return Ok(await _mediator.Send(new GetBooksByAuthorIdQuery(authorId)));
+            try
+            {
+                var operationResult = await _mediator.Send(new GetBooksByAuthorIdQuery(authorId));
+                return ReturnCode(operationResult);
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // Add/Create New Book
@@ -46,51 +87,45 @@ namespace API.Controllers
         [Route("createBook")]
         public async Task<IActionResult> CreateBook([FromBody] BookDto newBook)
         {
-            return Ok(await _mediator.Send(new CreateBookCommand(newBook)));
+            try
+            {
+                var operationResult = await _mediator.Send(new CreateBookCommand(newBook));
+                return ReturnCode(operationResult);
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpDelete]
         [Route("deleteBook/{id}")]
         public async Task<IActionResult> DeleteBook(Guid id)
         {
-            return Ok(await _mediator.Send(new DeleteBookCommand(id)));
-            /*
             try
             {
-                handler.Handle(command);
-                return Ok("Book deleted succesfully.");
+                var operationResult = await _mediator.Send(new DeleteBookCommand(id));
+                return ReturnCode(operationResult);
             }
-            catch (UnauthorizedAccessException ex)
+            catch
             {
-                return Forbid(ex.Message);
+                return StatusCode(500, "Internal server error");
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            */
         }
 
         [HttpPut]
         [Route("updateBook/{id}")]
         public async Task<IActionResult> UpdateBook([FromBody] BookDto updatedBook, Guid id)
         {
-            return Ok(await _mediator.Send(new UpdateBookCommand(updatedBook, id)));
-/*
             try
             {
-                handler.Handle(command);
-                return Ok("Book update succesfully.");
+                var operationResult = await _mediator.Send(new UpdateBookCommand(updatedBook, id));
+                return ReturnCode(operationResult);
             }
-            catch (UnauthorizedAccessException ex)
+            catch
             {
-                return Forbid(ex.Message);
+                return StatusCode(500, "Internal server error");
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-*/
         }
     }
 }

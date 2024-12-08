@@ -3,6 +3,7 @@ using Application.Commands.Authors;
 using MediatR;
 using Application.DataTransferObjects.Authors;
 using Application.Queries.Authors;
+using Domain;
 
 namespace API.Controllers
 {
@@ -17,12 +18,36 @@ namespace API.Controllers
             _mediator = mediator;
         }
 
+        private IActionResult ReturnCode<T>(OperationResult<T> operationResult)
+        {
+            if (operationResult.IsSuccessful)
+            {
+                return Ok(new { message = operationResult.Message, data = operationResult.Data, details = operationResult.Details });
+            }
+            else if (operationResult.IsKeyNotFound)
+            {
+                return NotFound(new { message = operationResult.Message, errors = operationResult.Details });
+            }
+            else
+            {
+                return BadRequest(new { message = operationResult.Message, errors = operationResult.Details });
+            }
+        }
+
         // Get all Authors from database
         [HttpGet]
         [Route("getAllAuthors")]
         public async Task<IActionResult> GetAllAuthors()
         {
-            return Ok(await _mediator.Send(new GetAllAuthorsQuery()));
+            try
+            {
+                var operationResult = await _mediator.Send(new GetAllAuthorsQuery());
+                return ReturnCode(operationResult);
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         //Get a Author by Id
@@ -30,7 +55,15 @@ namespace API.Controllers
         [Route("getAuthorId/{authorId}")]
         public async Task<IActionResult> GetAuthorById(Guid authorId)
         {
-            return Ok(await _mediator.Send(new GetAuthorByIdQuery(authorId)));
+            try
+            {
+                var operationResult = await _mediator.Send(new GetAuthorByIdQuery(authorId));
+                return ReturnCode(operationResult);
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // Create a new Author
@@ -38,60 +71,45 @@ namespace API.Controllers
         [Route("createAuthor")]
         public async Task<IActionResult> CreateAuthor([FromBody] AuthorDto author)
         {
-            return Ok(await _mediator.Send(new CreateAuthorCommand(author)));
+            try
+            {
+                var operationResult = await _mediator.Send(new CreateAuthorCommand(author));
+                return ReturnCode(operationResult);
+            }
+            catch
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPut]
         [Route("updateAuthor/{id}")]
         public async Task<IActionResult> UpdateAuthor([FromBody] AuthorDto updatedAuthor, Guid id)
         {
-            return Ok(await _mediator.Send(new UpdateAuthorCommand(updatedAuthor, id)));
-        }
-
-        /* TODO: Exception handling like this for above?
-        [HttpPut("{id}")]
-        public IActionResult UpdateAuthor(Guid id, [FromBody] UpdateAuthorDto )
-        {
-            command.Id = id;
-            var handler = new UpdateAuthorCommandHandler();
             try
             {
-                handler.Handle(command);
-                return Ok("Author update succesfully.");
+                var operationResult = await _mediator.Send(new UpdateAuthorCommand(updatedAuthor, id));
+                return ReturnCode(operationResult);
             }
-            catch (KeyNotFoundException ex)
+            catch
             {
-                return NotFound(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
+                return StatusCode(500, "Internal server error");
             }
         }
-        */
 
         [HttpDelete]
         [Route("deleteAuthor/{id}")]
         public async Task<IActionResult> DeleteAuthor(Guid id)
         {
-            return Ok(await _mediator.Send(new DeleteAuthorCommand(id)));
-        }
-        /*
-        [HttpDelete("{id}")]
-        public IActionResult DeleteAuthor(Guid id)
-        {
-            var command = new DeleteAuthorCommand { Id = id };
-            var handler = new DeleteAuthorCommandHandler();
             try
             {
-                handler.Handle(command);
-                return Ok("Author deleted succesfully");
+                var operationResult = await _mediator.Send(new DeleteAuthorCommand(id));
+                return ReturnCode(operationResult);
             }
-            catch (KeyNotFoundException ex)
+            catch
             {
-                return NotFound(ex.Message);
+                return StatusCode(500, "Internal server error");
             }
         }
-        */
     }
 }

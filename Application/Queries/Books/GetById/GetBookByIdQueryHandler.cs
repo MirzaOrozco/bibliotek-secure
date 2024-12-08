@@ -4,7 +4,7 @@ using Domain;
 
 namespace Application.Queries.Books
 {
-    public class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, Book>
+    public class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, OperationResult<Book>>
     {
         private readonly FakeDatabase _db;
 
@@ -13,10 +13,14 @@ namespace Application.Queries.Books
             _db = db;
         }
 
-        public Task<Book> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<Book>> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
         {
-            var foundBook = _db.Books.FirstOrDefault(book => book.Id == request.Id)!;
-            return Task.FromResult(foundBook);
+            var foundBook = _db.Books.Find(book => book.Id == request.Id);
+            if (foundBook == null)
+            {
+                return OperationResult<Book>.KeyNotFound(request.Id);
+            }
+            return OperationResult<Book>.Successful(foundBook);
         }
     }
 

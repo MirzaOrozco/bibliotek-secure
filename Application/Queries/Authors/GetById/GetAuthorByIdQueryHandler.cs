@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Queries.Authors
 {
-    public class GetAuthorByIdQueryHandler : IRequestHandler<GetAuthorByIdQuery, Author>
+    public class GetAuthorByIdQueryHandler : IRequestHandler<GetAuthorByIdQuery, OperationResult<Author>>
     {
         private readonly FakeDatabase _db;
 
@@ -13,10 +13,14 @@ namespace Application.Queries.Authors
             _db = db;
         }
 
-        public Task<Author> Handle(GetAuthorByIdQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<Author>> Handle(GetAuthorByIdQuery request, CancellationToken cancellationToken)
         {
-            var foundAuthor = _db.Authors.FirstOrDefault(author => author.Id == request.Id)!;
-            return Task.FromResult(foundAuthor);
+            var foundAuthor = _db.Authors.Find(author => author.Id == request.Id);
+            if (foundAuthor == null)
+            {
+                return OperationResult<Author>.KeyNotFound(request.Id);
+            }
+            return OperationResult<Author>.Successful(foundAuthor);
         }
     }
 }

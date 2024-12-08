@@ -22,10 +22,11 @@ namespace Tests.BookTests.QueryTest.GetAll
             var query = new GetAllBooksQuery();
 
             // Act
-            var result = await _handler.Handle(query, CancellationToken.None);
+            var operationResult = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(result);
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.Equal(_db.Books.Count, result.Count);
         }
     }

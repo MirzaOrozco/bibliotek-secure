@@ -29,9 +29,11 @@ namespace Tests.AuthorTests.CommandTest.Update
             int oldCount = _db.Authors.Count;
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(updatedAuthor.Name, result.Name);
             Assert.Equal(oldCount, _db.Authors.Count);
@@ -42,7 +44,7 @@ namespace Tests.AuthorTests.CommandTest.Update
         }
 
         [Fact]
-        public async Task InvalidAuthorId_ThrowsKeyNotFoundException()
+        public async Task InvalidAuthorId_KeyNotFound()
         {
             // Arrange
             AuthorDto updatedAuthor = new AuthorDto
@@ -53,14 +55,15 @@ namespace Tests.AuthorTests.CommandTest.Update
             var command = new UpdateAuthorCommand(updatedAuthor, AuthorId);
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<KeyNotFoundException>(action);
+            Assert.False(operationResult.IsSuccessful);
+            Assert.True(operationResult.IsKeyNotFound);
         }
 
         [Fact]
-        public async Task InvalidName_ThrowsArgumentException()
+        public async Task InvalidName_Failure()
         {
             // Arrange
             AuthorDto updatedAuthor = new AuthorDto
@@ -71,10 +74,10 @@ namespace Tests.AuthorTests.CommandTest.Update
             var command = new UpdateAuthorCommand(updatedAuthor, AuthorId);
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action);
+            Assert.False(operationResult.IsSuccessful);
         }
     }
 }

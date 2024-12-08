@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Commands.Authors
 {
-    public class CreateAuthorCommand : IRequest<Author>
+    public class CreateAuthorCommand : IRequest<OperationResult<Author>>
     {
         public CreateAuthorCommand(AuthorDto newAuthor)
         {

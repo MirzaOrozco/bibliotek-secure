@@ -29,9 +29,11 @@ namespace Tests.BookTests.CommandTest.Create
             int oldCount = _db.Books.Count;
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(newBook.Title, result.Title);
             Assert.Equal(oldCount + 1, _db.Books.Count);
@@ -40,7 +42,7 @@ namespace Tests.BookTests.CommandTest.Create
         }
 
         [Fact]
-        public async Task InvalidTitleAndValidAuthor_ThrowsArgumentException()
+        public async Task InvalidTitleAndValidAuthor_Failure()
         {
             // Arrange
             BookDto newBook = new BookDto
@@ -52,15 +54,15 @@ namespace Tests.BookTests.CommandTest.Create
             int oldCount = _db.Books.Count;
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action); 
+            Assert.False(operationResult.IsSuccessful);
             Assert.Equal(oldCount, _db.Books.Count);
         }
 
         [Fact]
-        public async Task ValidTitleAndInvalidAuthor_ThrowsArgumentException()
+        public async Task ValidTitleAndInvalidAuthor_Failure()
         {
             // Arrange
             BookDto newBook = new BookDto
@@ -72,15 +74,15 @@ namespace Tests.BookTests.CommandTest.Create
             int oldCount = _db.Books.Count;
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action);
+            Assert.False(operationResult.IsSuccessful);
             Assert.Equal(oldCount, _db.Books.Count);
         }
 
         [Fact]
-        public async Task InvalidTitleAndInvalidAuthor_ThrowsArgumentException()
+        public async Task InvalidTitleAndInvalidAuthor_Failure()
         {
             // Arrange
             BookDto newBook = new BookDto
@@ -92,10 +94,10 @@ namespace Tests.BookTests.CommandTest.Create
             int oldCount = _db.Books.Count;
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action);
+            Assert.False(operationResult.IsSuccessful);
             Assert.Equal(oldCount, _db.Books.Count);
         }
     }

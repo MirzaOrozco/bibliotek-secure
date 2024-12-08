@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Application.Queries.Books
 {
-    public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, List<Book>>
+    public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, OperationResult<List<Book>>>
     {
         private readonly FakeDatabase _db;
 
@@ -19,10 +19,10 @@ namespace Application.Queries.Books
             _db = db;
         }
 
-        public Task<List<Book>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<List<Book>>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
         {
             var books = _db.Books;
-            return Task.FromResult(books);
+            return OperationResult<List<Book>>.Successful(books, String.Format("Found {0} books", books.Count));
         }
     }
 }

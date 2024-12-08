@@ -26,9 +26,11 @@ namespace Tests.AuthorTests.CommandTest.Delete
             int oldCount = _db.Authors.Count;
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(AuthorId, result.Id);
             Assert.Equal(oldCount - 1, _db.Authors.Count);
@@ -36,7 +38,7 @@ namespace Tests.AuthorTests.CommandTest.Delete
         }
 
         [Fact]
-        public async Task AuthorWithBooks_ThrowsArgumentException()
+        public async Task AuthorWithBooks_Failure()
         {
             // Arrange
             Guid AuthorId = new Guid("12345678-1234-5678-1234-a00000000000");
@@ -44,15 +46,15 @@ namespace Tests.AuthorTests.CommandTest.Delete
             int oldCount = _db.Authors.Count;
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action);
+            Assert.False(operationResult.IsSuccessful);
             Assert.Equal(oldCount, _db.Authors.Count);
         }
 
         [Fact]
-        public async Task InvalidAuthorId_ThrowsKeyNotFoundException()
+        public async Task InvalidAuthorId_KeyNotFound()
         {
             // Arrange
             Guid AuthorId = Guid.NewGuid();
@@ -60,10 +62,11 @@ namespace Tests.AuthorTests.CommandTest.Delete
             int oldCount = _db.Authors.Count;
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<KeyNotFoundException>(action);
+            Assert.False(operationResult.IsSuccessful);
+            Assert.True(operationResult.IsKeyNotFound);
             Assert.Equal(oldCount, _db.Authors.Count);
         }
     }
