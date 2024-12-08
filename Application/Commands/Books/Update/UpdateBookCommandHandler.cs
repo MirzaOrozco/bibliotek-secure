@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Commands.Books
 {
-    public class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand, Book>
+    public class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand, OperationResult<Book>>
     {
         private readonly FakeDatabase _db;
 
@@ -13,29 +13,29 @@ namespace Application.Commands.Books
             _db = db;
         }
 
-        public Task<Book> Handle(UpdateBookCommand command, CancellationToken cancellationToken)
+        public async Task<OperationResult<Book>> Handle(UpdateBookCommand command, CancellationToken cancellationToken)
         {
             // Search for the book to update
             var book = _db.Books.Find(b => b.Id == command.Id);
             if (book == null)
             {
-                throw new KeyNotFoundException("The book doesn't exist.");
+                return OperationResult<Book>.KeyNotFound(command.Id);
             }
             // Check if title is valid
             if (string.IsNullOrWhiteSpace(command.UpdatedBook.Title))
             {
-                throw new ArgumentException("The book title can not be empty");
+                return OperationResult<Book>.Failure("The book title can not be empty");
             }
             // Check if there's an author with that id
             if (_db.Authors.Find(x => x.Id == command.UpdatedBook.AuthorId) == null)
             {
-                throw new ArgumentException("Author ID should be valid");
+                return OperationResult<Book>.Failure("Author ID should be valid");
             }
 
             // Update Book
             book.Title = command.UpdatedBook.Title;
             book.AuthorId = command.UpdatedBook.AuthorId;
-            return Task.FromResult(book);
+            return OperationResult<Book>.Successful(book);
         }
     }
 }

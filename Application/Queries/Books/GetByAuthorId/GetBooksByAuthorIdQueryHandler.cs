@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Queries.Books
 {
-    public class GetBooksByAuthorIdQueryHandler : IRequestHandler<GetBooksByAuthorIdQuery, List<Book>>
+    public class GetBooksByAuthorIdQueryHandler : IRequestHandler<GetBooksByAuthorIdQuery, OperationResult<List<Book>>>
     {
         private readonly FakeDatabase _db;
 
@@ -13,10 +13,18 @@ namespace Application.Queries.Books
             _db = db;
         }
 
-        public Task<List<Book>> Handle(GetBooksByAuthorIdQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<List<Book>>> Handle(GetBooksByAuthorIdQuery request, CancellationToken cancellationToken)
         {
             var books = _db.Books.FindAll(book => book.AuthorId == request.Id);
-            return Task.FromResult(books);
+            if (books.Count == 0)
+            {
+                if (_db.Authors.Find(author => author.Id == request.Id) == null)
+                {
+                    return OperationResult<List<Book>>.KeyNotFound(request.Id, "There are no author with Id={0} in the library");
+                }
+                return OperationResult<List<Book>>.Failure("There are no books by that author in the library");
+            }
+            return OperationResult<List<Book>>.Successful(books, String.Format("Found {0} books by author Id {1}", books.Count, request.Id));
         }
     }
 }

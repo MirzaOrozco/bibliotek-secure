@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Commands.Books
 {
-    public class CreateBookCommandHandler : IRequestHandler<CreateBookCommand, Book>
+    public class CreateBookCommandHandler : IRequestHandler<CreateBookCommand, OperationResult<Book>>
     {
         private readonly FakeDatabase _db;
 
@@ -14,18 +14,18 @@ namespace Application.Commands.Books
             _db = db; // FakeDataBase
         }
 
-        public Task<Book> Handle(CreateBookCommand command, CancellationToken cancellationToken)
+        public async Task<OperationResult<Book>> Handle(CreateBookCommand command, CancellationToken cancellationToken)
         {
             // Check if title is valid
             if (string.IsNullOrWhiteSpace(command.NewBook.Title))
             {
-                throw new ArgumentException("The book title can not be empty");
+                return OperationResult<Book>.Failure("The book title can not be empty");
             }
 
             // Check if there's an author with that id
             if (_db.Authors.Find(x => x.Id == command.NewBook.AuthorId) == null)
             {
-                throw new ArgumentException("Author ID should be valid");
+                return OperationResult<Book>.Failure("Author ID should be valid");
             }
 
             // Create a new book
@@ -39,7 +39,7 @@ namespace Application.Commands.Books
             // Add book to Db
             _db.Books.Add(newBook);
 
-            return Task.FromResult(newBook);
+            return OperationResult<Book>.Successful(newBook);
         }
     }
 }

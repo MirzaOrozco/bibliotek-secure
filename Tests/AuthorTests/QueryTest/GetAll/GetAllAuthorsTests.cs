@@ -22,10 +22,11 @@ namespace Tests.AuthorTests.QueryTest.GetAll
             var query = new GetAllAuthorsQuery();
 
             // Act
-            var result = await _handler.Handle(query, CancellationToken.None);
+            var operationResult = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(result);
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.Equal(_db.Authors.Count, result.Count);
         }
     }

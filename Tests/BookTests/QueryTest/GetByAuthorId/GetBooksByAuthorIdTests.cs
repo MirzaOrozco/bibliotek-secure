@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Data;
 using Application.Queries.Books;
+using Domain;
 
 namespace Tests.BookTests.QueryTest.GetByAuthorId
 {
@@ -24,9 +25,11 @@ namespace Tests.BookTests.QueryTest.GetByAuthorId
             var query = new GetBooksByAuthorIdQuery(AuthorId);
 
             // Act
-            var result = await _handler.Handle(query, CancellationToken.None);
+            var operationResult = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
             Assert.Equal(AuthorId, result[0].AuthorId);
@@ -35,7 +38,7 @@ namespace Tests.BookTests.QueryTest.GetByAuthorId
         }
 
         [Fact]
-        public async Task InvalidId_ReturnsEmpty()
+        public async Task InvalidId_Failure()
         {
             // Arrange
             var invalidAuthorId = Guid.NewGuid();
@@ -43,10 +46,10 @@ namespace Tests.BookTests.QueryTest.GetByAuthorId
             var query = new GetBooksByAuthorIdQuery(invalidAuthorId);
 
             // Act
-            var result = await _handler.Handle(query, CancellationToken.None);
+            var operationResult = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.Empty(result);
+            Assert.False(operationResult.IsSuccessful);
         }
     }
 }

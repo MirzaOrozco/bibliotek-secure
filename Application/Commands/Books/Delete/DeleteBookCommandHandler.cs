@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Commands.Books
 {
-    public class DeleteBookCommandHandler : IRequestHandler<DeleteBookCommand, Book>
+    public class DeleteBookCommandHandler : IRequestHandler<DeleteBookCommand, OperationResult<Book>>
     {
         private readonly FakeDatabase _db;
 
@@ -13,18 +13,18 @@ namespace Application.Commands.Books
             _db = db;
         }
 
-        public Task<Book> Handle(DeleteBookCommand command, CancellationToken cancellationToken)
+        public async Task<OperationResult<Book>> Handle(DeleteBookCommand command, CancellationToken cancellationToken)
         {
             // Search the book to delete
             var book = _db.Books.Find(b => b.Id == command.Id);
             if (book == null)
             {
-                throw new KeyNotFoundException("The book doesn't exist");
+                return OperationResult<Book>.KeyNotFound(command.Id);
             }
 
             // Delete the book
             _db.Books.Remove(book);
-            return Task.FromResult(book);
+            return OperationResult<Book>.Successful(book);
         }
     }
 }

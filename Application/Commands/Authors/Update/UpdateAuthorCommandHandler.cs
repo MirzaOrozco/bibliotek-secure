@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Commands.Authors
 {
-    public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, Author>
+    public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, OperationResult<Author>>
     {
         private readonly FakeDatabase _db;
 
@@ -13,21 +13,21 @@ namespace Application.Commands.Authors
             _db = db;
         }
 
-        public Task<Author> Handle(UpdateAuthorCommand command, CancellationToken cancellationToken)
+        public async Task<OperationResult<Author>> Handle(UpdateAuthorCommand command, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(command.UpdatedAuthor.Name))
             {
-                throw new ArgumentException("The new Author's name can not be empty.");
+                return OperationResult<Author>.Failure("The new Author's name can not be empty.");
             }
 
             var author = _db.Authors.Find(a => a.Id == command.Id);
             if (author == null)
             {
-                throw new KeyNotFoundException("The Author doesn't exist.");
+                return OperationResult<Author>.KeyNotFound(command.Id);
             }
 
             author.Name = command.UpdatedAuthor.Name;
-            return Task.FromResult(author);
+            return OperationResult<Author>.Successful(author);
         }
     }
 }

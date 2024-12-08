@@ -28,9 +28,11 @@ namespace Tests.AuthorTests.CommandTest.Create
             int oldCount = _db.Authors.Count;
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(newAuthor.Name, result.Name);
             Assert.Equal(oldCount + 1, _db.Authors.Count);
@@ -39,7 +41,7 @@ namespace Tests.AuthorTests.CommandTest.Create
         }
 
         [Fact]
-        public async Task EmptyName_ThrowsArgumentException()
+        public async Task EmptyName_Failure()
         {
             // Arrange
             AuthorDto newAuthor = new AuthorDto
@@ -50,15 +52,15 @@ namespace Tests.AuthorTests.CommandTest.Create
             int oldCount = _db.Authors.Count;
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action); 
+            Assert.False(operationResult.IsSuccessful);
             Assert.Equal(oldCount, _db.Authors.Count);
         }
 
         [Fact]
-        public async Task NameWithSpaces_ThrowsArgumentException()
+        public async Task NameWithSpaces_Failure()
         {
             // Arrange
             AuthorDto newAuthor = new AuthorDto
@@ -69,10 +71,10 @@ namespace Tests.AuthorTests.CommandTest.Create
             int oldCount = _db.Authors.Count;
 
             // Act
-            var action = async () => await _handler.Handle(command, CancellationToken.None);
+            var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(action);
+            Assert.False(operationResult.IsSuccessful);
             Assert.Equal(oldCount, _db.Authors.Count);
         }
     }

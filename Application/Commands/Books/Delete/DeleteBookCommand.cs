@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Commands.Books
 {
-    public class DeleteBookCommand : IRequest<Book>
+    public class DeleteBookCommand : IRequest<OperationResult<Book>>
     {
         public DeleteBookCommand(Guid id)
         {

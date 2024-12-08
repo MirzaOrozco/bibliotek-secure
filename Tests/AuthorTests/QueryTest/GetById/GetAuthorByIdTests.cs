@@ -23,25 +23,27 @@ namespace Tests.AuthorTests.QueryTest.GetById
             var query = new GetAuthorByIdQuery(AuthorId);
 
             // Act
-            var result = await _handler.Handle(query, CancellationToken.None);
+            var operationResult = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(result);
+            Assert.True(operationResult.IsSuccessful);
+            var result = operationResult.Data;
             Assert.Equal(AuthorId, result.Id);
         }
 
         [Fact]
-        public async Task InvalidId_ReturnsNull()
+        public async Task InvalidId_KeyNotFound()
         {
             // Arrange
             var invalidAuthorId = Guid.NewGuid();
             var query = new GetAuthorByIdQuery(invalidAuthorId);
 
             // Act
-            var result = await _handler.Handle(query, CancellationToken.None);
+            var operationResult = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.Null(result);
+            Assert.False(operationResult.IsSuccessful);
+            Assert.True(operationResult.IsKeyNotFound);
         }
     }
 }
