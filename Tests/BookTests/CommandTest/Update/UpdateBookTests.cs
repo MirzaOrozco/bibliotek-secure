@@ -1,5 +1,8 @@
 ﻿using Application.Commands.Books;
 using Application.DataTransferObjects.Books;
+using Application.Interfaces.RepositoryInterfaces;
+using Domain;
+using FakeItEasy;
 using Infrastructure.Data;
 using Infrastructure.Repository;
 using Tests.MemoryDatabase;
@@ -18,7 +21,7 @@ namespace Tests.BookTests.CommandTest.Update
         }
 
         [Fact]
-        public async Task ValidTitleAndAuthorAndBookId_UpdatesBook()
+        public async Task ValidIdAndData_UpdatesAndReturnsBook()
         {
             // Arrange
             BookDto updatedBook = new BookDto
@@ -81,6 +84,35 @@ namespace Tests.BookTests.CommandTest.Update
             var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
+            Assert.False(operationResult.IsSuccessful);
+            Assert.False(operationResult.IsKeyNotFound);
+        }
+
+        [Fact]
+        public async Task InvalidTitleCheckedInHandler_ReturnFailureEvenIfFakeItEasyRepositoryReturnSuccess()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var testBook = new Book { Id = bookId, Title = "TestTitle", AuthorId = Guid.NewGuid() };
+            BookDto updatedBook = new BookDto
+            {
+                Title = String.Empty,
+                AuthorId = testBook.AuthorId
+            };
+
+            // Create fake repository that return success
+            var fakeRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => fakeRepository.Update(bookId, updatedBook))
+                .Returns(OperationResult<Book>.Successful(testBook));
+
+            var handler = new UpdateBookCommandHandler(fakeRepository);
+            var command = new UpdateBookCommand(updatedBook, bookId);
+
+            // Act
+            var operationResult = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            // It is expected that the handler check basic argument correctness and the repository validates ids, so should not care about fake repository response
             Assert.False(operationResult.IsSuccessful);
             Assert.False(operationResult.IsKeyNotFound);
         }
