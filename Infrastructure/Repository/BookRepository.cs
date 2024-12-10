@@ -4,7 +4,6 @@ using Application.Interfaces.RepositoryInterfaces;
 using Azure.Core;
 using Domain;
 using Infrastructure.Data;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Infrastructure.Repository
 {
@@ -37,7 +36,7 @@ namespace Infrastructure.Repository
             _db.Books.Add(newBook);
             _db.SaveChanges();
 
-            return OperationResult<Book>.Successful(newBook);
+            return OperationResult<Book>.Successful(newBook, String.Format("Created Book {0}", newBook.Id));
         }
 
         public OperationResult<Book> Delete(Guid id)
@@ -52,7 +51,7 @@ namespace Infrastructure.Repository
             // Delete the book
             _db.Books.Remove(book);
             _db.SaveChanges();
-            return OperationResult<Book>.Successful(book);
+            return OperationResult<Book>.Successful(book, String.Format("Deleted Book {0}", id));
         }
 
         public OperationResult<List<Book>> GetAll()
