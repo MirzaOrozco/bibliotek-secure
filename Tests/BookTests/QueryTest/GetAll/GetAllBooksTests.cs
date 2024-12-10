@@ -1,18 +1,19 @@
 ﻿using Infrastructure.Data;
 using Application.Queries.Books;
+using Infrastructure.Repository;
+using Tests.MemoryDatabase;
 
 namespace Tests.BookTests.QueryTest.GetAll
 {
     public class GetAllBooksTests
     {
         private GetAllBooksQueryHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public GetAllBooksTests()
         {
-            // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new GetAllBooksQueryHandler(_db);
+            _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new GetAllBooksQueryHandler(new BookRepository(_db));
         }
 
         [Fact]
@@ -27,7 +28,7 @@ namespace Tests.BookTests.QueryTest.GetAll
             // Assert
             Assert.True(operationResult.IsSuccessful);
             var result = operationResult.Data;
-            Assert.Equal(_db.Books.Count, result.Count);
+            Assert.Equal(_db.Books.Count(), result.Count);
         }
     }
 }

@@ -4,12 +4,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "Presentation\API.csproj", "{048538EA-E537-456E-94C6-E0975E821ED6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E910778E-71E7-4D68-92FD-E3AD962B6989} = {E910778E-71E7-4D68-92FD-E3AD962B6989}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{89C363B6-0D2A-4C2D-8B22-33779CE2281B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{BC11379F-EF78-46D4-8F94-0B3EB558B2A6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{E910778E-71E7-4D68-92FD-E3AD962B6989}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BC11379F-EF78-46D4-8F94-0B3EB558B2A6} = {BC11379F-EF78-46D4-8F94-0B3EB558B2A6}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{A177B9EB-979F-4BEB-BB89-1CBCC7F118C8}"
 EndProject

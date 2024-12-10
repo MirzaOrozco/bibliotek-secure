@@ -1,14 +1,14 @@
-﻿using Domain;
-using Infrastructure.Data;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Domain;
 using MediatR;
 
 namespace Application.Commands.Authors
 {
     public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, OperationResult<Author>>
     {
-        private readonly FakeDatabase _db;
+        private readonly IAuthorRepository _db;
 
-        public UpdateAuthorCommandHandler(FakeDatabase db)
+        public UpdateAuthorCommandHandler(IAuthorRepository db)
         {
             _db = db;
         }
@@ -20,14 +20,7 @@ namespace Application.Commands.Authors
                 return OperationResult<Author>.Failure("The new Author's name can not be empty.");
             }
 
-            var author = _db.Authors.Find(a => a.Id == command.Id);
-            if (author == null)
-            {
-                return OperationResult<Author>.KeyNotFound(command.Id);
-            }
-
-            author.Name = command.UpdatedAuthor.Name;
-            return OperationResult<Author>.Successful(author);
+            return _db.Update(command.Id, command.UpdatedAuthor);
         }
     }
 }

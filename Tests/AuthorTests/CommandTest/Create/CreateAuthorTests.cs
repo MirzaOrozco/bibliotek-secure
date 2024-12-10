@@ -1,19 +1,22 @@
 ﻿using Infrastructure.Data;
 using Application.Commands.Authors;
 using Application.DataTransferObjects.Authors;
+using Microsoft.EntityFrameworkCore;
+using Infrastructure.Repository;
+using Domain;
+using Tests.MemoryDatabase;
 
 namespace Tests.AuthorTests.CommandTest.Create
 {
     public class CreateAuthorTests
     {
         private CreateAuthorCommandHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public CreateAuthorTests()
         {
-            // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new CreateAuthorCommandHandler(_db);
+             _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new CreateAuthorCommandHandler(new AuthorRepository(_db));
         }
 
         [Fact]
@@ -25,7 +28,7 @@ namespace Tests.AuthorTests.CommandTest.Create
                 Name = "ATest"
             };
             var command = new CreateAuthorCommand(newAuthor);
-            int oldCount = _db.Authors.Count;
+            int oldCount = _db.Authors.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
@@ -35,7 +38,7 @@ namespace Tests.AuthorTests.CommandTest.Create
             var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(newAuthor.Name, result.Name);
-            Assert.Equal(oldCount + 1, _db.Authors.Count);
+            Assert.Equal(oldCount + 1, _db.Authors.Count());
             // Verify that Author was created
             Assert.Contains(_db.Authors, a => a.Name == newAuthor.Name);
         }
@@ -49,14 +52,14 @@ namespace Tests.AuthorTests.CommandTest.Create
                 Name = String.Empty
             };
             var command = new CreateAuthorCommand(newAuthor);
-            int oldCount = _db.Authors.Count;
+            int oldCount = _db.Authors.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
             Assert.False(operationResult.IsSuccessful);
-            Assert.Equal(oldCount, _db.Authors.Count);
+            Assert.Equal(oldCount, _db.Authors.Count());
         }
 
         [Fact]
@@ -68,14 +71,14 @@ namespace Tests.AuthorTests.CommandTest.Create
                 Name = "    "
             };
             var command = new CreateAuthorCommand(newAuthor);
-            int oldCount = _db.Authors.Count;
+            int oldCount = _db.Authors.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
             Assert.False(operationResult.IsSuccessful);
-            Assert.Equal(oldCount, _db.Authors.Count);
+            Assert.Equal(oldCount, _db.Authors.Count());
         }
     }
 }

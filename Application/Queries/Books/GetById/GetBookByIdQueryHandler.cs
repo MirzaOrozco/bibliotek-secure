@@ -1,26 +1,21 @@
-﻿using Infrastructure.Data;
-using MediatR;
+﻿using MediatR;
 using Domain;
+using Application.Interfaces.RepositoryInterfaces;
 
 namespace Application.Queries.Books
 {
     public class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, OperationResult<Book>>
     {
-        private readonly FakeDatabase _db;
+        private readonly IBookRepository _db;
 
-        public GetBookByIdQueryHandler(FakeDatabase db)
+        public GetBookByIdQueryHandler(IBookRepository db)
         {
             _db = db;
         }
 
         public async Task<OperationResult<Book>> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
         {
-            var foundBook = _db.Books.Find(book => book.Id == request.Id);
-            if (foundBook == null)
-            {
-                return OperationResult<Book>.KeyNotFound(request.Id);
-            }
-            return OperationResult<Book>.Successful(foundBook);
+            return _db.GetById(request.Id);
         }
     }
 

@@ -1,19 +1,20 @@
 ﻿using Application.Commands.Books;
 using Application.DataTransferObjects.Books;
 using Infrastructure.Data;
+using Infrastructure.Repository;
+using Tests.MemoryDatabase;
 
 namespace Tests.BookTests.CommandTest.Update
 {
     public class UpdateBookTests
     {
         private UpdateBookCommandHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public UpdateBookTests()
         {
-            // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new UpdateBookCommandHandler(_db);
+            _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new UpdateBookCommandHandler(new BookRepository(_db));
         }
 
         [Fact]
@@ -27,7 +28,7 @@ namespace Tests.BookTests.CommandTest.Update
             };
             Guid bookId = new Guid("12345678-1234-5678-1234-b00000000000");
             var command = new UpdateBookCommand(updatedBook, bookId);
-            int oldCount = _db.Books.Count;
+            int oldCount = _db.Books.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
@@ -37,11 +38,11 @@ namespace Tests.BookTests.CommandTest.Update
             var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(updatedBook.Title, result.Title);
-            Assert.Equal(oldCount, _db.Books.Count);
+            Assert.Equal(oldCount, _db.Books.Count());
             // Verify that book was updated
             Assert.Contains(_db.Books, b => b.Title == updatedBook.Title && b.AuthorId == updatedBook.AuthorId && b.Id == bookId);
             // Verify that book is still unique
-            Assert.Single(_db.Books.FindAll(b => b.Id == bookId));
+            Assert.Single(_db.Books.ToList().FindAll(b => b.Id == bookId));
         }
 
         [Fact]

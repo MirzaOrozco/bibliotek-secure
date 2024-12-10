@@ -1,4 +1,4 @@
-﻿using Infrastructure.Data;
+﻿using Application.Interfaces.RepositoryInterfaces;
 using Domain;
 using MediatR;
 
@@ -6,9 +6,9 @@ namespace Application.Commands.Authors
 {
     public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, OperationResult<Author>>
     {
-        private readonly FakeDatabase _db;
+        private readonly IAuthorRepository _db;
 
-        public CreateAuthorCommandHandler(FakeDatabase db)
+        public CreateAuthorCommandHandler(IAuthorRepository db)
         {
             _db = db;
         }
@@ -20,14 +20,7 @@ namespace Application.Commands.Authors
                 return OperationResult<Author>.Failure("The name of the Author can not be empty");
             }
 
-            var newAuthor = new Author
-            {
-                Id = Guid.NewGuid(),
-                Name = command.NewAuthor.Name
-            };
-
-            _db.Authors.Add(newAuthor);
-            return OperationResult<Author>.Successful(newAuthor);
+            return _db.Create(command.NewAuthor);
         }
     }
 }

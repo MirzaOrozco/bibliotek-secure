@@ -1,20 +1,20 @@
 ﻿
 using Application.Commands.Books;
-using Application.DataTransferObjects.Books;
 using Infrastructure.Data;
+using Infrastructure.Repository;
+using Tests.MemoryDatabase;
 
 namespace Tests.BookTests.CommandTest.Delete
 {
     public class DeleteBookTests
     {
         private DeleteBookCommandHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public DeleteBookTests()
         {
-            // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new DeleteBookCommandHandler(_db);
+            _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new DeleteBookCommandHandler(new BookRepository(_db));
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace Tests.BookTests.CommandTest.Delete
             // Arrange
             Guid bookId = new Guid("12345678-1234-5678-1234-b00000000000");
             var command = new DeleteBookCommand(bookId);
-            int oldCount = _db.Books.Count;
+            int oldCount = _db.Books.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
@@ -33,7 +33,7 @@ namespace Tests.BookTests.CommandTest.Delete
             var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(bookId, result.Id);
-            Assert.Equal(oldCount - 1, _db.Books.Count);
+            Assert.Equal(oldCount - 1, _db.Books.Count());
             Assert.DoesNotContain(_db.Books, b => b.Id == bookId);
         }
 
@@ -43,7 +43,7 @@ namespace Tests.BookTests.CommandTest.Delete
             // Arrange
             Guid bookId = Guid.NewGuid();
             var command = new DeleteBookCommand(bookId);
-            int oldCount = _db.Books.Count;
+            int oldCount = _db.Books.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
@@ -51,7 +51,7 @@ namespace Tests.BookTests.CommandTest.Delete
             // Assert
             Assert.False(operationResult.IsSuccessful);
             Assert.True(operationResult.IsKeyNotFound);
-            Assert.Equal(oldCount, _db.Books.Count);
+            Assert.Equal(oldCount, _db.Books.Count());
         }
     }
 }
