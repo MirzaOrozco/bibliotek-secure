@@ -1,18 +1,19 @@
 ﻿using Application.Queries.Authors;
 using Infrastructure.Data;
+using Infrastructure.Repository;
+using Tests.MemoryDatabase;
 
 namespace Tests.AuthorTests.QueryTest.GetById
 {
     public class GetAuthorByIdTests
     {
         private GetAuthorByIdQueryHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public GetAuthorByIdTests()
         {
-            // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new GetAuthorByIdQueryHandler(_db);
+            _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new GetAuthorByIdQueryHandler(new AuthorRepository(_db));
         }
 
         [Fact]

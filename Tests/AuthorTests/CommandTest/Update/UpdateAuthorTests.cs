@@ -1,19 +1,21 @@
 ﻿using Application.Commands.Authors;
 using Application.DataTransferObjects.Authors;
 using Infrastructure.Data;
+using Infrastructure.Repository;
+using Tests.MemoryDatabase;
 
 namespace Tests.AuthorTests.CommandTest.Update
 {
     public class UpdateAuthorTests
     {
         private UpdateAuthorCommandHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public UpdateAuthorTests()
         {
             // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new UpdateAuthorCommandHandler(_db);
+            _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new UpdateAuthorCommandHandler(new AuthorRepository(_db));
         }
 
         [Fact]
@@ -26,7 +28,7 @@ namespace Tests.AuthorTests.CommandTest.Update
             };
             Guid AuthorId = new Guid("12345678-1234-5678-1234-a00000000000");
             var command = new UpdateAuthorCommand(updatedAuthor, AuthorId);
-            int oldCount = _db.Authors.Count;
+            int oldCount = _db.Authors.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
@@ -36,11 +38,11 @@ namespace Tests.AuthorTests.CommandTest.Update
             var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(updatedAuthor.Name, result.Name);
-            Assert.Equal(oldCount, _db.Authors.Count);
+            Assert.Equal(oldCount, _db.Authors.Count());
             // Verify that Author was updated
             Assert.Contains(_db.Authors, a => a.Name == updatedAuthor.Name && a.Id == AuthorId);
             // Verify that Author is still unique
-            Assert.Single(_db.Authors.FindAll(a => a.Id == AuthorId));
+            Assert.Single(_db.Authors.Where(a => a.Id == AuthorId).ToList());
         }
 
         [Fact]

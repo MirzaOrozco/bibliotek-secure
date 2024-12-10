@@ -1,18 +1,19 @@
 ﻿using Application.Queries.Books;
 using Infrastructure.Data;
+using Infrastructure.Repository;
+using Tests.MemoryDatabase;
 
 namespace Tests.BookTests.QueryTest.GetById
 {
     public class GetBookByIdTests
     {
         private GetBookByIdQueryHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public GetBookByIdTests()
         {
-            // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new GetBookByIdQueryHandler(_db);
+            _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new GetBookByIdQueryHandler(new BookRepository(_db));
         }
 
         [Fact]

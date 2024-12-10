@@ -2,19 +2,20 @@
 using Application.Commands.Authors;
 using Application.DataTransferObjects.Authors;
 using Infrastructure.Data;
+using Infrastructure.Repository;
+using Tests.MemoryDatabase;
 
 namespace Tests.AuthorTests.CommandTest.Delete
 {
     public class DeleteAuthorTests
     {
         private DeleteAuthorCommandHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public DeleteAuthorTests()
         {
-            // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new DeleteAuthorCommandHandler(_db);
+            _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new DeleteAuthorCommandHandler(new AuthorRepository(_db));
         }
 
         [Fact]
@@ -23,7 +24,7 @@ namespace Tests.AuthorTests.CommandTest.Delete
             // Arrange
             Guid AuthorId = new Guid("12345678-1234-5678-1234-a0000000000a");
             var command = new DeleteAuthorCommand(AuthorId);
-            int oldCount = _db.Authors.Count;
+            int oldCount = _db.Authors.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
@@ -33,7 +34,7 @@ namespace Tests.AuthorTests.CommandTest.Delete
             var result = operationResult.Data;
             Assert.NotNull(result);
             Assert.Equal(AuthorId, result.Id);
-            Assert.Equal(oldCount - 1, _db.Authors.Count);
+            Assert.Equal(oldCount - 1, _db.Authors.Count());
             Assert.DoesNotContain(_db.Authors, a => a.Id == AuthorId);
         }
 
@@ -43,14 +44,14 @@ namespace Tests.AuthorTests.CommandTest.Delete
             // Arrange
             Guid AuthorId = new Guid("12345678-1234-5678-1234-a00000000000");
             var command = new DeleteAuthorCommand(AuthorId);
-            int oldCount = _db.Authors.Count;
+            int oldCount = _db.Authors.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
             Assert.False(operationResult.IsSuccessful);
-            Assert.Equal(oldCount, _db.Authors.Count);
+            Assert.Equal(oldCount, _db.Authors.Count());
         }
 
         [Fact]
@@ -59,7 +60,7 @@ namespace Tests.AuthorTests.CommandTest.Delete
             // Arrange
             Guid AuthorId = Guid.NewGuid();
             var command = new DeleteAuthorCommand(AuthorId);
-            int oldCount = _db.Authors.Count;
+            int oldCount = _db.Authors.Count();
 
             // Act
             var operationResult = await _handler.Handle(command, CancellationToken.None);
@@ -67,7 +68,7 @@ namespace Tests.AuthorTests.CommandTest.Delete
             // Assert
             Assert.False(operationResult.IsSuccessful);
             Assert.True(operationResult.IsKeyNotFound);
-            Assert.Equal(oldCount, _db.Authors.Count);
+            Assert.Equal(oldCount, _db.Authors.Count());
         }
     }
 }

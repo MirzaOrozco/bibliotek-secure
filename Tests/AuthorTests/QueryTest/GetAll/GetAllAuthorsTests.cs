@@ -1,18 +1,19 @@
 ﻿using Infrastructure.Data;
 using Application.Queries.Authors;
+using Tests.MemoryDatabase;
+using Infrastructure.Repository;
 
 namespace Tests.AuthorTests.QueryTest.GetAll
 {
     public class GetAllAuthorsTests
     {
         private GetAllAuthorsQueryHandler _handler;
-        private FakeDatabase _db;
+        private RealDatabase _db;
 
         public GetAllAuthorsTests()
         {
-            // Initialize the handler and fake database
-            _db = new FakeDatabase();
-            _handler = new GetAllAuthorsQueryHandler(_db);
+            _db = CreateTestDb.CreateInMemoryTestDbWithData();
+            _handler = new GetAllAuthorsQueryHandler(new AuthorRepository(_db));
         }
 
         [Fact]
@@ -27,7 +28,7 @@ namespace Tests.AuthorTests.QueryTest.GetAll
             // Assert
             Assert.True(operationResult.IsSuccessful);
             var result = operationResult.Data;
-            Assert.Equal(_db.Authors.Count, result.Count);
+            Assert.Equal(_db.Authors.Count(), result.Count);
         }
     }
 }
