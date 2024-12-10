@@ -1,35 +1,34 @@
-﻿using Application.Queries.Books;
-using Infrastructure.Data;
-using Infrastructure.Repository;
-using Tests.MemoryDatabase;
+﻿using Application.Interfaces.RepositoryInterfaces;
+using Application.Queries.Books;
+using FakeItEasy;
+using Domain;
 
 namespace Tests.BookTests.QueryTest.GetById
 {
     public class GetBookByIdTests
     {
-        private GetBookByIdQueryHandler _handler;
-        private RealDatabase _db;
-
-        public GetBookByIdTests()
-        {
-            _db = CreateTestDb.CreateInMemoryTestDbWithData();
-            _handler = new GetBookByIdQueryHandler(new BookRepository(_db));
-        }
-
         [Fact]
         public async Task ValidId_ReturnsBook()
         {
             // Arrange
-            var BookId = new Guid("12345678-1234-5678-1234-b00000000000");
+            var BookId = Guid.NewGuid();
+            var testBook = new Book { Id = BookId, Title = "TestTitle", AuthorId = Guid.NewGuid() };
+
+            // Create fake repository that return the test book
+            var fakeRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => fakeRepository.GetById(BookId))
+                .Returns(OperationResult<Book>.Successful(testBook));
+
+            var handler = new GetBookByIdQueryHandler(fakeRepository);
             var query = new GetBookByIdQuery(BookId);
 
             // Act
-            var operationResult = await _handler.Handle(query, CancellationToken.None);
+            var operationResult = await handler.Handle(query, CancellationToken.None);
 
             // Assert
             Assert.True(operationResult.IsSuccessful);
             var result = operationResult.Data;
-            Assert.Equal(BookId, result.Id);
+            Assert.Equal(testBook, result);
         }
 
         [Fact]
@@ -37,10 +36,16 @@ namespace Tests.BookTests.QueryTest.GetById
         {
             // Arrange
             var invalidBookId = Guid.NewGuid();
+            // Create fake repository that returns key not found
+            var fakeRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => fakeRepository.GetById(invalidBookId))
+                .Returns(OperationResult<Book>.KeyNotFound(invalidBookId));
+
+            var handler = new GetBookByIdQueryHandler(fakeRepository);
             var query = new GetBookByIdQuery(invalidBookId);
 
             // Act
-            var operationResult = await _handler.Handle(query, CancellationToken.None);
+            var operationResult = await handler.Handle(query, CancellationToken.None);
 
             // Assert
             Assert.False(operationResult.IsSuccessful);
