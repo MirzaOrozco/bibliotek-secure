@@ -23,7 +23,7 @@ namespace Infrastructure.Repository
             };
             _db.Authors.Add(newAuthor);
             _db.SaveChanges();
-            return OperationResult<Author>.Successful(newAuthor);
+            return OperationResult<Author>.Successful(newAuthor, String.Format("Created Author {0}", newAuthor.Id));
         }
 
         public OperationResult<Author> Delete(Guid id)
@@ -41,7 +41,7 @@ namespace Infrastructure.Repository
             }
             _db.Authors.Remove(author);
             _db.SaveChanges();
-            return OperationResult<Author>.Successful(author);
+            return OperationResult<Author>.Successful(author, String.Format("Deleted Author {0}", id));
         }
 
         public OperationResult<List<Author>> GetAll()
